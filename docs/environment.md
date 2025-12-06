@@ -1,21 +1,22 @@
 # Environment — Power BI ETL Orders
-**Date:** 2025-06-12
+**Date:** 2025-12-06  
 **Prepared by:** Babak Sharifyalmeh
 
 ## Local machine
-- OS: Windows 10 Pro (build XXXXX)   # مثال را با سیستم خودت پر کن
+- OS: Windows 10 Pro (build 19044) 
 - RAM: 8 GB
-- CPU: Intel i5-XXXX
+- CPU: Intel i5-8250U  (یا مقدار واقعی دستگاهت)
 
 ## Power BI
-- Power BI Desktop version:  Version: 2.143.4379.0 64-bit (May 2025) - Install date: YYYY-MM-DD
+- Power BI Desktop version:  (مثلاً 2.159.1011.0)   <-- از مسیر File → Help → About نسخه دقیق را کپی کن
+- Install date: 2025-12-06
 - Source: https://powerbi.microsoft.com/desktop/
 
-## Optional / Other tools
-- Git version: [git --version]
-- Python (if used): [python --version]
-- Any virtualization (if macOS): [tool and version]
+## Git / Other tools
+- Git version: (مثلاً git version 2.39.2)   
+- Python (if used): (مثلاً Python 3.10.8)  
+- Any virtualization (if macOS): None
 
 ## Notes
-- If on macOS: Power BI Desktop not supported natively — VM or BootCamp recommended.
-- Any special configs or extensions used: [...]
+- Power BI Desktop روی macOS به‌صورت بومی پشتیبانی نمی‌شود — در صورت استفاده از مک از ماشین مجازی یا BootCamp استفاده شده است.
+- هیچ افزونهٔ خاصی در Power BI نصب نشده است. 
