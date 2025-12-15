@@ -1,39 +1,156 @@
-Data Quality Exploration Notes
-Dataset: OrderBreakdown_Raw
-1. Row Count
+# Project Notes – Power BI ETL Orders
 
-The visible sample contains ~20 rows, but the full dataset needs to be counted programmatically during ingestion.
+## Overview
 
-2. Column Quality & NULL Issues
+این فایل به‌عنوان **دفترچه یادداشت اجرایی پروژه** استفاده می‌شود و ثبت‌کننده‌ی تصمیمات، اقدامات انجام‌شده، و نکات مهم در حین اجرای تسک‌هاست. هدف از این فایل، مستندسازی سریع و غیررسمی اتفاقات پروژه است (در مقابل `project-report.md` که گزارش رسمی و نهایی‌تر خواهد بود).
 
-Column	Observed Issues
-Order ID	High number of NULL values (~40%). Many rows appear to belong to the same order and require Fill Down. Currently unsuitable as a primary key.
-Product Name	No critical issues observed.
-Discount	Numeric and clean.
-Sales	Contains the suffix “ريال” and thousands separators → must be cleaned and converted to numeric (float).
-Profit	Same issue as Sales: textual currency suffix + thousands separator → requires cleaning.
-Quantity	Numeric, no major issues.
-Category / Sub-Category	Seems complete and consistent.
+---
 
-3. Data Types
+## Task 1 – Environment Setup & Core ETL (Completed)
 
-Many columns are inferred as any.
-Sales and Profit must become float.
-Category and Sub-Category should be categorical/string.
+**Status:** ✅ Completed
 
-4. Structural Issues
+### 1. Environment Setup
 
-The sheet is not a formal Table, only a loose range. This can cause ingestion and PowerQuery parsing issues.
-Filter icons and manual formatting may interfere with automated processing.
+* آخرین نسخه **Power BI Desktop** از وب‌سایت رسمی Microsoft نصب شد.
+* پروژه به‌صورت **Power BI Project (.pbip)** ایجاد شد تا سازگاری بهتری با Git داشته باشد.
+* ساختار پوشه‌ها مطابق با تمپلیت اولیه پروژه ایجاد و تأیید شد.
 
-5. Key Issue Summary
+**Notes:**
 
-OrderBreakdown_Raw: Order ID is missing in many rows and requires Fill Down. Sales and Profit contain the “ريال” suffix and thousand separators, preventing numeric parsing. Column data types are not correctly detected.
+* استفاده از PBIP باعث می‌شود تغییرات مدل، کوئری‌ها و ریپورت قابل ردیابی در Git باشند.
+* در حال حاضر فایل `requirements.txt` خالی است (نیازی به Python یا ابزار جانبی وجود نداشت).
 
-6. Additional Potential Challenges
+---
 
-Possible duplicate rows due to missing Order IDs.
-Mixed formatting or Unicode variants of the word “ريال”.
-Need to validate whether negative sales/profit exist (returns).
+### 2. Data Ingestion (Excel Sources)
 
-The dataset may combine multiple logical order breakdown formats into a single sheet.
+* داده‌ها از مسیر زیر واکشی شدند:
+
+  `Data/Raw Data/`
+
+* منابع داده:
+
+  * **List of Order**
+  * **OrderBreakdown**
+
+* هر دو منبع از طریق مسیر **Get Data → Excel** وارد Power Query Editor شدند.
+
+**Notes:**
+
+* در این مرحله هیچ فیلتری روی داده خام اعمال نشد.
+* بررسی کیفیت داده‌ها قبلاً به‌صورت Exploratory در commit جداگانه مستند شده است.
+
+---
+
+### 3. Data Transformation – Business Logic
+
+#### 3.1 Profit Categorization
+
+* یک **Conditional Column** با نام `Profit Category` ایجاد شد:
+
+  * Profit < 0  → `Negative profit`
+  * Profit = 0  → `Break-even`
+  * Profit > 0  → `Positive profit`
+
+**Purpose:**
+
+* ساده‌سازی تحلیل سودآوری و شناسایی سفارش‌های زیان‌ده در گزارش‌ها.
+
+---
+
+#### 3.2 Country Standardization
+
+* در ستون `Country` مقدار **United Kingdom** به **UK** تغییر داده شد.
+
+**Reason:**
+
+* جلوگیری از چندگانگی نام کشورها در ویژوال‌ها و KPIها.
+
+---
+
+#### 3.3 Product Name Normalization
+
+* ستون `Product Name` که شامل نام محصول + ویژگی بود Split شد.
+* نام ستون ویژگی به `Product Name2` تغییر داده شد.
+
+**Outcome:**
+
+* امکان تحلیل جداگانه بر اساس نام محصول و ویژگی آن فراهم شد.
+
+---
+
+### 4. Merge vs Append (Learning-Oriented Step)
+
+* دو کوئری `List of Order` و `OrderBreakdown`:
+
+  * با استفاده از **Merge Queries (Join)** ترکیب شدند.
+  * خروجی در کوئری جدیدی با نام `Total` ذخیره شد.
+
+* به‌صورت آموزشی، یک **Append Queries** نیز انجام شد تا تفاوت Merge و Append در عمل بررسی شود.
+
+**Key Takeaway:**
+
+* Merge → ترکیب افقی بر اساس کلید مشترک
+* Append → ترکیب عمودی ردیف‌ها
+
+---
+
+### 5. Persian Calendar Integration
+
+* به دلیل نیاز کاربر نهایی به تاریخ شمسی:
+
+  * یک فایل Excel حاوی **تاریخ میلادی، تاریخ شمسی و ماه شمسی** ایجاد شد.
+  * این فایل از طریق Get Data وارد Power BI شد.
+
+* پس از `Close & Apply`، در **Model View**:
+
+  * بین `Order Date` و ستون تاریخ میلادی در جدول تقویم شمسی Relationship ایجاد شد.
+
+**Result:**
+
+* امکان استفاده از تاریخ شمسی در Slicerها و ویژوال‌ها فراهم شد.
+
+---
+
+### 6. Data Type & Formatting
+
+* در Power Query Editor:
+
+  * تمام ستون‌ها Select شدند.
+  * گزینه **Detect Data Type** اعمال شد.
+
+* ستون‌های مالی:
+
+  * `Sale`
+  * `Profit`
+
+  به نوع **Fixed Decimal Number** تغییر داده شدند.
+
+**Reason:**
+
+* جلوگیری از خطاهای محاسباتی و نمایش استاندارد مقادیر مالی.
+
+---
+
+## General Notes
+
+* در این تسک اسکرین‌شاتی در پوشه `Outputs/` ذخیره نشده است.
+* برای تسک‌های بعدی، ثبت اسکرین‌شات از مراحل کلیدی الزامی خواهد بود.
+* این تسک پایه‌ی تمام مراحل بعدی (مدل‌سازی، DAX، داشبوردسازی) محسوب می‌شود.
+
+---
+
+## Git Status
+
+* این مرحله آماده‌ی Commit است.
+* Commit پیشنهادی:
+
+```bash
+ git add docs/notes.md
+ git commit -m "docs: add execution notes for Task 1 (core ETL steps)"
+```
+
+---
+
+*Last updated: Dec 2025*
