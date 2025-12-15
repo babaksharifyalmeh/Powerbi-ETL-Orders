@@ -1,5 +1,15 @@
 # 📊 Power BI ETL Orders – Sales Performance Dashboard
 
+<p align="center">
+  <img 
+    src="Images\Images-Dashboard\Dashboard.png" 
+    alt="Sales Performance Dashboard"
+    style="border:10px solid #ffffff;"
+    width="400"
+  >
+</p>
+
+
 ## 🚀 Project Overview
 
 This project demonstrates an **end-to-end ETL and reporting workflow in Power BI**, starting from raw Excel data and ending with an interactive **Sales Performance Dashboard**.
