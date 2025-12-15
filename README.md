@@ -5,7 +5,7 @@
     src="Images\Images-Dashboard\Dashboard.png" 
     alt="Sales Performance Dashboard"
     style="border:10px solid #ffffff;"
-    width="400"
+    width="1000"
   >
 </p>
 
